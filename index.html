@@ -16,15 +16,12 @@
       padding: 20px;
       line-height: 1.5;
     }
-    h1, h2 {
-      margin-bottom: 10px;
-    }
     label {
       display: block;
       margin-top: 15px;
       font-weight: bold;
     }
-    input, textarea, select, button {
+    input, textarea, button {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
@@ -55,9 +52,6 @@
       border: 1px solid #ccc;
       border-radius: 10px;
       background: #fafafa;
-    }
-    .recipe-title {
-      margin-top: 0;
     }
     .section-title {
       font-weight: bold;
@@ -95,16 +89,16 @@
   </div>
 
   <label for="ingredients">Ingrediënten (1 per regel)</label>
-  <textarea id="ingredients" placeholder="200g pasta&#10;2 eieren&#10;100g spek"></textarea>
+  <textarea id="ingredients"></textarea>
 
   <label for="preparation">Bereiding (1 stap per regel)</label>
-  <textarea id="preparation" placeholder="Kook de pasta&#10;Bak het spek&#10;Meng alles"></textarea>
+  <textarea id="preparation"></textarea>
 
   <label for="notesTitle">Titel extra notities</label>
   <input id="notesTitle" type="text" placeholder="Notes" />
 
   <label for="notes">Notities (1 per regel)</label>
-  <textarea id="notes" placeholder="Serveer direct&#10;Extra Parmezaan erbij"></textarea>
+  <textarea id="notes"></textarea>
 
   <label for="closing">Afsluiting</label>
   <input id="closing" type="text" placeholder="Eet smakelijk!" />
@@ -137,10 +131,7 @@
       };
 
       function splitLines(value) {
-        return value
-          .split("\n")
-          .map(s => s.trim())
-          .filter(Boolean);
+        return value.split("\n").map(s => s.trim()).filter(Boolean);
       }
 
       function dataFromForm() {
@@ -180,40 +171,19 @@
         if (data.difficulty) metaParts.push(`Moeilijkheid: ${esc(data.difficulty)}`);
 
         els.preview.innerHTML = `
-          <h1 class="recipe-title">${esc(data.title || "Jouw recept")}</h1>
-          ${data.intro ? `<p class="intro">${esc(data.intro)}</p>` : ""}
+          <h1>${esc(data.title || "Jouw recept")}</h1>
+          ${data.intro ? `<p>${esc(data.intro)}</p>` : ""}
           ${metaParts.length ? `<p class="meta">${metaParts.join(" · ")}</p>` : ""}
-
           <div>
             <div class="section-title">Ingrediënten</div>
-            ${
-              data.ingredients.length
-                ? `<ul>${data.ingredients.map(item => `<li>${esc(item)}</li>`).join("")}</ul>`
-                : `<p>Geen ingrediënten ingevuld.</p>`
-            }
+            ${data.ingredients.length ? `<ul>${data.ingredients.map(item => `<li>${esc(item)}</li>`).join("")}</ul>` : `<p>Geen ingrediënten ingevuld.</p>`}
           </div>
-
           <div>
             <div class="section-title">Bereiding</div>
-            ${
-              data.preparation.length
-                ? `<ol>${data.preparation.map(step => `<li>${esc(step)}</li>`).join("")}</ol>`
-                : `<p>Geen bereidingsstappen ingevuld.</p>`
-            }
+            ${data.preparation.length ? `<ol>${data.preparation.map(step => `<li>${esc(step)}</li>`).join("")}</ol>` : `<p>Geen bereidingsstappen ingevuld.</p>`}
           </div>
-
-          ${
-            data.notes.length
-              ? `
-                <div>
-                  <div class="section-title">${esc(data.notesTitle)}</div>
-                  <ul>${data.notes.map(note => `<li>${esc(note)}</li>`).join("")}</ul>
-                </div>
-              `
-              : ""
-          }
-
-          ${data.closing ? `<p class="closing">${esc(data.closing)}</p>` : ""}
+          ${data.notes.length ? `<div><div class="section-title">${esc(data.notesTitle)}</div><ul>${data.notes.map(note => `<li>${esc(note)}</li>`).join("")}</ul></div>` : ""}
+          ${data.closing ? `<p>${esc(data.closing)}</p>` : ""}
         `;
       }
 
@@ -221,25 +191,15 @@
         const data = dataFromForm();
         const children = [];
 
-        children.push(
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-              new TextRun({
-                text: data.title || "Jouw recept",
-                bold: true,
-                size: 32
-              })
-            ]
-          })
-        );
+        children.push(new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [new TextRun({ text: data.title || "Jouw recept", bold: true, size: 32 })]
+        }));
 
         if (data.intro) {
-          children.push(
-            new Paragraph({
-              children: [new TextRun({ text: data.intro, italics: true })]
-            })
-          );
+          children.push(new Paragraph({
+            children: [new TextRun({ text: data.intro, italics: true })]
+          }));
         }
 
         const meta = [];
@@ -248,124 +208,73 @@
         if (data.difficulty) meta.push(`Moeilijkheid: ${data.difficulty}`);
 
         if (meta.length) {
-          children.push(
-            new Paragraph({
-              children: [new TextRun({ text: meta.join(" · "), bold: true })]
-            })
-          );
+          children.push(new Paragraph({
+            children: [new TextRun({ text: meta.join(" · "), bold: true })]
+          }));
         }
 
-        children.push(
-          new Paragraph({
-            children: [new TextRun({ text: "Ingrediënten", bold: true, size: 28 })]
-          })
-        );
+        children.push(new Paragraph({
+          children: [new TextRun({ text: "Ingrediënten", bold: true, size: 28 })]
+        }));
 
         if (data.ingredients.length) {
           data.ingredients.forEach(item => {
-            children.push(
-              new Paragraph({
-                text: item,
-                bullet: { level: 0 }
-              })
-            );
+            children.push(new Paragraph({ text: item, bullet: { level: 0 } }));
           });
         } else {
           children.push(new Paragraph("Geen ingrediënten ingevuld."));
         }
 
-        children.push(
-          new Paragraph({
-            children: [new TextRun({ text: "Bereiding", bold: true, size: 28 })]
-          })
-        );
+        children.push(new Paragraph({
+          children: [new TextRun({ text: "Bereiding", bold: true, size: 28 })]
+        }));
 
         if (data.preparation.length) {
           data.preparation.forEach((step, index) => {
-            children.push(
-              new Paragraph({
-                children: [new TextRun(`${index + 1}. ${step}`)]
-              })
-            );
+            children.push(new Paragraph({
+              children: [new TextRun(`${index + 1}. ${step}`)]
+            }));
           });
         } else {
           children.push(new Paragraph("Geen bereidingsstappen ingevuld."));
         }
 
         if (data.notes.length) {
-          children.push(
-            new Paragraph({
-              children: [new TextRun({ text: data.notesTitle, bold: true, size: 28 })]
-            })
-          );
-
+          children.push(new Paragraph({
+            children: [new TextRun({ text: data.notesTitle, bold: true, size: 28 })]
+          }));
           data.notes.forEach(note => {
-            children.push(
-              new Paragraph({
-                text: note,
-                bullet: { level: 0 }
-              })
-            );
+            children.push(new Paragraph({ text: note, bullet: { level: 0 } }));
           });
         }
 
         if (data.closing) {
-          children.push(
-            new Paragraph({
-              alignment: AlignmentType.CENTER,
-              children: [new TextRun({ text: data.closing, bold: true })]
-            })
-          );
+          children.push(new Paragraph({
+            alignment: AlignmentType.CENTER,
+            children: [new TextRun({ text: data.closing, bold: true })]
+          }));
         }
 
         const doc = new Document({
-          sections: [
-            {
-              properties: {},
-              children
-            }
-          ]
+          sections: [{ properties: {}, children }]
         });
 
         const blob = await Packer.toBlob(doc);
-
-        const filename =
-          (data.title || "recept")
-            .toLowerCase()
-            .replace(/[^a-z0-9à-ž]+/gi, "-")
-            .replace(/^-+|-+$/g, "") + ".docx";
-
+        const filename = ((data.title || "recept").toLowerCase().replace(/[^a-z0-9à-ž]+/gi, "-").replace(/^-+|-+$/g, "")) + ".docx";
         saveAs(blob, filename);
       }
 
       function clearForm() {
-        els.title.value = "";
-        els.intro.value = "";
-        els.serves.value = "";
-        els.time.value = "";
-        els.difficulty.value = "";
-        els.ingredients.value = "";
-        els.preparation.value = "";
-        els.notesTitle.value = "";
-        els.notes.value = "";
-        els.closing.value = "";
+        Object.values(els).forEach(el => {
+          if (el && "value" in el) el.value = "";
+        });
         renderPreview();
       }
 
       [
-        els.title,
-        els.intro,
-        els.serves,
-        els.time,
-        els.difficulty,
-        els.ingredients,
-        els.preparation,
-        els.notesTitle,
-        els.notes,
-        els.closing
-      ].forEach(el => {
-        el.addEventListener("input", renderPreview);
-      });
+        els.title, els.intro, els.serves, els.time, els.difficulty,
+        els.ingredients, els.preparation, els.notesTitle, els.notes, els.closing
+      ].forEach(el => el.addEventListener("input", renderPreview));
 
       els.downloadBtn.addEventListener("click", generateWord);
       els.clearBtn.addEventListener("click", clearForm);
